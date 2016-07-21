@@ -1,8 +1,22 @@
 ﻿{
-  "version": "1.0.0-*",
+  "version": "0.0.1",
+  "authors": [ "zxm" ],
+  "description": "zxm.Dapper is an extensions to intergration with dapper-dot-net and MicroOrm.Dapper.Repositories.",
+  "title": "zxm.Dapper",
+  "copyright": "2016 © zxm",
+  "packOptions": {
+    "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0",
+    "projectUrl": "https://github.com/hhappyzxm/zxm.Dapper",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/hhappyzxm/zxm.Dapper"
+    },
+    "tags": [ "dapper", "repository" ]
+  },
 
   "dependencies": {
-    "NETStandard.Library": "1.6.0"
+    "NETStandard.Library": "1.6.0",
+    "MicroOrm.Dapper.Repositories": "1.4.2"
   },
 
   "frameworks": {
