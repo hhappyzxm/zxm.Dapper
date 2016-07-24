@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Data.SqlClient;
-using zxm.Dapper;
-using Dapper;
 
-namespace zxm.Dapper.Tests.DatabaseFixture
+namespace zxm.Dapper.Tests.Fixture
 {
     public class MsSqlDatabaseFixture : IDisposable
     {
         public MsSqlDatabaseFixture()
         {
-            var connString = "server=192.168.0.119;database=zxm.Dapper;uid=sa;pwd=Ls1;";
+            var connString = "server=smartfleetserver;database=zxm.Dapper;uid=sa;pwd=Ls1;";
 
             Db = new DbContext(new SqlConnection(connString));
 

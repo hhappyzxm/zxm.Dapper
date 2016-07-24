@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
 using Xunit;
-using zxm.Dapper.Tests.DatabaseFixture;
 using zxm.Dapper.Tests.Entities;
+using zxm.Dapper.Tests.Fixture;
 using zxm.Dapper.Tests.Services;
 
 namespace zxm.Dapper.Tests
