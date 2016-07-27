@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Dapper;
+using System;
 using System.Data.SqlClient;
 
 namespace zxm.Dapper.Tests.Fixture
