@@ -6,7 +6,7 @@
   </PropertyGroup>
   <Import Project="$(VSToolsPath)\DotNet\Microsoft.DotNet.Props" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup Label="Globals">
-    <ProjectGuid>24dbecfa-c584-4e9f-9833-0688da740d2e</ProjectGuid>
+    <ProjectGuid>27557d8a-d5a0-4b2f-8294-bd8de8154452</ProjectGuid>
     <RootNamespace>zxm.Dapper.Tests</RootNamespace>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">.\obj</BaseIntermediateOutputPath>
     <OutputPath Condition="'$(OutputPath)'=='' ">.\bin\</OutputPath>
