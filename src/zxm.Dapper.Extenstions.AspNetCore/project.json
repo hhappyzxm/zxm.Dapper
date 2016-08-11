@@ -1,0 +1,29 @@
+﻿{
+  "version": "1.0.0",
+  "authors": [ "zxm" ],
+  "description": "zxm.Dapper.Extensions.AspNetCore is an extensions to use zxm.Dapper within AspNetCore.",
+  "title": "zxm.Dapper.Extensions.AspNetCore",
+  "copyright": "2016 ? zxm",
+  "packOptions": {
+    "owners": [ "zxm" ],
+    "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0",
+    "projectUrl": "https://github.com/hhappyzxm/zxm.MailKit",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/hhappyzxm/zxm.MailKit"
+    },
+    "tags": [ "Dapper" ]
+  },
+
+  "dependencies": {
+    "Microsoft.AspNetCore.Http.Abstractions": "1.0.0",
+    "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0",
+    "zxm.Dapper": { "target": "project" }
+  },
+
+  "frameworks": {
+    "netstandard1.3": {
+    },
+    "net451": {}
+  }
+}
