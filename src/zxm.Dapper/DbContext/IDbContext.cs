@@ -15,13 +15,5 @@ namespace zxm.Dapper
         /// <typeparam name="TEntity"></typeparam>
         /// <returns></returns>
         IRepository<TEntity> SetEntity<TEntity>() where TEntity : class;
-
-        /// <summary>
-        /// Get repository by it's own type
-        /// </summary>
-        /// <typeparam name="TRepository"></typeparam>
-        /// <param name="func"></param>
-        /// <returns></returns>
-        TRepository SetRepository<TRepository>(Func<IDbConnection, TRepository> func) where TRepository : IRepository;
     }
 }

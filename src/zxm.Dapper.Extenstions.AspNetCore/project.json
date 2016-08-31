@@ -1,5 +1,5 @@
 ﻿{
-  "version": "1.0.2",
+  "version": "1.1.0",
   "authors": [ "zxm" ],
   "description": "zxm.Dapper.Extensions.AspNetCore is an extensions to use zxm.Dapper within AspNetCore.",
   "title": "zxm.Dapper.Extensions.AspNetCore",

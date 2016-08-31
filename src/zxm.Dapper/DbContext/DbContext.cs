@@ -10,16 +10,19 @@ namespace zxm.Dapper
     /// </summary>
     public class DbContext : DapperDbContext, IDbContext
     {
-        private Dictionary<Type, IRepository> Repositories { get; }
-
-        /// <summary>
-        /// Constructor of DbContext
-        /// </summary>
-        /// <param name="connection"></param>
-        public DbContext(IDbConnection connection) : base(connection)
+        public DbContext(IDbConnection connection) : this(connection, InternalRepositoryFactory.Instance)
+        {
+        }
+        
+        public DbContext(IDbConnection connection, IRepositoryFactory repositoryFactory):base(connection)
         {
             Repositories = new Dictionary<Type, IRepository>();
+            RepositoryFactory = repositoryFactory;
         }
+
+        public Dictionary<Type, IRepository> Repositories;
+
+        public IRepositoryFactory RepositoryFactory;
 
         /// <summary>
         /// Get repository by type of entity
@@ -36,29 +39,7 @@ namespace zxm.Dapper
             }
             else
             {
-                var repository = new Repository<TEntity>(Connection);
-                Repositories.Add(type, repository);
-                return repository;
-            }
-        }
-
-        /// <summary>
-        /// Get repository by it's own type
-        /// If can't find target within private dicionary, build new repository instance through func from caller then add it to private dictionary
-        /// </summary>
-        /// <typeparam name="TRepository"></typeparam>
-        /// <param name="func"></param>
-        /// <returns></returns>
-        public TRepository SetRepository<TRepository>(Func<IDbConnection, TRepository> func) where TRepository : IRepository
-        {
-            var type = typeof (TRepository);
-            if (Repositories.ContainsKey(type))
-            {
-                return (TRepository) Repositories[type];
-            }
-            else
-            {
-                var repository = func(Connection);
+                var repository = RepositoryFactory.CreateRepository<TEntity>(Connection);
                 Repositories.Add(type, repository);
                 return repository;
             }

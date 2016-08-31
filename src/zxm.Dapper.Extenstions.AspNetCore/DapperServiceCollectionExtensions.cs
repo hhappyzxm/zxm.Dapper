@@ -13,17 +13,17 @@ namespace zxm.Dapper.Extenstions.AspNetCore
                 throw new ArgumentNullException(connectionString);
             }
 
-            return AddDapper(services, () => new DbContext(new SqlConnection(connectionString)));
+            return AddDapper(services, provider => new DbContext(new SqlConnection(connectionString)));
         }
 
-        public static IServiceCollection AddDapper(this IServiceCollection services, Func<IDbContext> dbContextBuilder)
+        public static IServiceCollection AddDapper(this IServiceCollection services, Func<IServiceProvider, IDbContext> dbContextBuilder)
         {
             if (dbContextBuilder == null)
             {
                 throw new ArgumentNullException(nameof(dbContextBuilder));
             }
             
-            services.AddScoped(provider => dbContextBuilder());
+            services.AddScoped(dbContextBuilder);
 
             return services;
         }

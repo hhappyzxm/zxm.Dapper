@@ -17,8 +17,7 @@ namespace zxm.Dapper.Tests
             var sqlConnection = new Mock<IDbConnection>();
             var db = new DbContext(sqlConnection.Object);
             
-            var dbType = db.GetType();
-            var repositories = (Dictionary<Type, IRepository>)dbType.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance)[0].GetValue(db);
+            var repositories = db.Repositories;
 
             var userRepository = db.SetEntity<User>();
             Assert.Equal(userRepository is IRepository<User>, true);
@@ -32,27 +31,6 @@ namespace zxm.Dapper.Tests
                 Assert.Equal(repositories.ContainsKey(typeof(User)), true);
             }
         }
-
-        [Fact]
-        public void TestSetRepository()
-        {
-            var sqlConnection = new Mock<IDbConnection>();
-            var db = new DbContext(sqlConnection.Object);
-
-            var dbType = db.GetType();
-            var repositories = (Dictionary<Type, IRepository>)dbType.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance)[0].GetValue(db);
-
-            var userCustomizeRepoistory = db.SetRepository(connection => new Mock<IUserRoleRepository>().Object);
-            Assert.Equal(userCustomizeRepoistory is IUserRoleRepository, true);
-            Assert.Equal(repositories.Count == 1, true);
-            Assert.Equal(repositories.ContainsKey(typeof(IUserRoleRepository)), true);
-
-            for (int i = 0; i < 10; i++)
-            {
-                db.SetRepository(connection => new Mock<IUserRoleRepository>().Object);
-                Assert.Equal(repositories.Count == 1, true);
-                Assert.Equal(repositories.ContainsKey(typeof(IUserRoleRepository)), true);
-            }
-        }
+        
     }
 }
