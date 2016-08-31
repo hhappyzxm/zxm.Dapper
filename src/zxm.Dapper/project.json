@@ -21,6 +21,10 @@
 
   "frameworks": {
     "net45": {},
-    "netstandard1.3": {}
+    "netstandard1.3": {
+      "buildOptions": {
+        "define": [ "COREFX" ]
+      }
+    }
   }
 }
