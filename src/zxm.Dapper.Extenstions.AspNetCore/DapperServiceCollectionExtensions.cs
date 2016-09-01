@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
+using zxm.Dapper.Context;
 
 namespace zxm.Dapper.Extenstions.AspNetCore
 {

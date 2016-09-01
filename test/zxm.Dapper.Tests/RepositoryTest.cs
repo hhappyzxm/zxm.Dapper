@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
-using MicroOrm.Dapper.Repositories.SqlGenerator;
 using Xunit;
 using zxm.Dapper;
 using zxm.Dapper.Tests.Entities;
@@ -26,15 +25,20 @@ namespace zxm.Dapper.Tests
             var users = (await _sqlDatabaseFixture.Db.SetEntity<User>().FindAllAsync<Car>(null, p => p.Cars)).ToList();
             Assert.Equal(users.Count, 2);
             Assert.Equal(users[0].Cars.Count, 2);
+            Assert.Equal(users[0].Cars[0].CarName, "Car1");
             Assert.Equal(users[1].Cars.Count, 0);
         }
 
         [Fact]
         public async Task TestMultipleMappingForTwoChild()
         {
+            var sql =  new SqlGenerator.SqlGenerator<User>();
+            var a = sql.GetSelectAll(null, p => p.Cars, p => p.Roles);
+
             var users = (await _sqlDatabaseFixture.Db.SetEntity<User>().FindAllAsync<Car, Role>(null, p => p.Cars, p=>p.Roles)).ToList();
             Assert.Equal(users.Count, 2);
             Assert.Equal(users[0].Cars.Count, 2);
+            Assert.Equal(users[0].Cars[0].CarName, "Car1");
             Assert.Equal(users[0].Roles.Count, 3);
             Assert.Equal(users[1].Cars.Count, 0);
             Assert.Equal(users[1].Roles.Count, 1);
@@ -48,6 +52,7 @@ namespace zxm.Dapper.Tests
             Assert.Equal(users[0].Cars.Count, 2);
             Assert.Equal(users[0].Roles.Count, 3);
             Assert.Equal(users[0].Images.Count, 1);
+            Assert.Equal(users[0].Cars[0].CarName, "Car1");
             Assert.Equal(users[1].Cars.Count, 0);
             Assert.Equal(users[1].Roles.Count, 1);
             Assert.Equal(users[1].Images.Count, 2);

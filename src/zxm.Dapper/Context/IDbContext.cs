@@ -1,14 +1,15 @@
-﻿using System;
-using System.Data;
-using MicroOrm.Dapper.Repositories.DbContext;
+﻿using System.Data;
+using zxm.Dapper.Repository;
 
-namespace zxm.Dapper
+namespace zxm.Dapper.Context
 {
     /// <summary>
     /// DbContext interface
     /// </summary>
-    public interface IDbContext : IDapperDbContext
+    public interface IDbContext
     {
+        IDbConnection Connection { get; }
+
         /// <summary>
         /// Get repository by type of entity
         /// </summary>

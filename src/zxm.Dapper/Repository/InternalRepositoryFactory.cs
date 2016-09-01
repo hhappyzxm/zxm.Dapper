@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using zxm.Dapper.Repository;
 
 namespace zxm.Dapper
 {

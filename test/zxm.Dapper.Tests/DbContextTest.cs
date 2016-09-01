@@ -4,6 +4,8 @@ using System.Data;
 using System.Reflection;
 using Moq;
 using Xunit;
+using zxm.Dapper.Context;
+using zxm.Dapper.Repository;
 using zxm.Dapper.Tests.Entities;
 using zxm.Dapper.Tests.Repositoires;
 
