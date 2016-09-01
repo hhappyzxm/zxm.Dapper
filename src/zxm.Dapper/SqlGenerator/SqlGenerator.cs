@@ -11,6 +11,7 @@ using zxm.Dapper.Attributes;
 using zxm.Dapper.Attributes.Joins;
 using zxm.Dapper.Attributes.LogicalDelete;
 using zxm.Dapper.Extensions;
+using zxm.Dapper.Helper;
 
 namespace zxm.Dapper.SqlGenerator
 {

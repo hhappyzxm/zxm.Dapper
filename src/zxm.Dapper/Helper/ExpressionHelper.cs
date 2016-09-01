@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using zxm.Dapper.Extensions;
 
-namespace zxm.Dapper.SqlGenerator
+namespace zxm.Dapper.Helper
 {
     internal static class ExpressionHelper
     {

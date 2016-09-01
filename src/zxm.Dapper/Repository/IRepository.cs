@@ -45,28 +45,13 @@ namespace zxm.Dapper.Repository
         /// <summary>
         ///
         /// </summary>
-        TEntity Find<TChild1>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, object>> tChild1, IDbTransaction transaction = null);
-
-        /// <summary>
-        ///
-        /// </summary>
-        Task<TEntity> FindAsync<TChild1>(Expression<Func<TEntity, object>> tChild1, IDbTransaction transaction = null);
-
-        /// <summary>
-        ///
-        /// </summary>
-        Task<TEntity> FindAsync<TChild1>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, object>> tChild1, IDbTransaction transaction = null);
+        Task<TEntity> FindAsync(IDbTransaction transaction = null);
 
         /// <summary>
         ///
         /// </summary>
         Task<TEntity> FindAsync(Expression<Func<TEntity, bool>> predicate, IDbTransaction transaction = null);
-
-        /// <summary>
-        ///
-        /// </summary>
-        Task<TEntity> FindAsync(IDbTransaction transaction = null);
-
+        
         /// <summary>
         ///
         /// </summary>
@@ -108,13 +93,25 @@ namespace zxm.Dapper.Repository
         /// </summary>
         Task<IEnumerable<TEntity>> FindAllAsync<TChild1>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, object>> tChild1, IDbTransaction transaction = null);
 
-        Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2>(Expression<Func<TEntity, object>> tChild1, Expression<Func<TEntity, object>> tChild2, IDbTransaction transaction = null) where TChild1 : class where TChild2 : class;
+        Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2>(Expression<Func<TEntity, object>> tChild1, Expression<Func<TEntity, object>> tChild2, IDbTransaction transaction = null);
 
-        Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, object>> tChild1, Expression<Func<TEntity, object>> tChild2, IDbTransaction transaction = null) where TChild1 : class where TChild2 : class;
+        Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, object>> tChild1, Expression<Func<TEntity, object>> tChild2, IDbTransaction transaction = null);
 
-        Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2, TChild3>(Expression<Func<TEntity, object>> tChild1, Expression<Func<TEntity, object>> tChild2, Expression<Func<TEntity, object>> tChild3, IDbTransaction transaction = null) where TChild1 : class where TChild2 : class where TChild3 : class;
+        Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2, TChild3>(Expression<Func<TEntity, object>> tChild1, Expression<Func<TEntity, object>> tChild2, Expression<Func<TEntity, object>> tChild3, IDbTransaction transaction = null);
 
-        Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2, TChild3>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, object>> tChild1, Expression<Func<TEntity, object>> tChild2, Expression<Func<TEntity, object>> tChild3, IDbTransaction transaction = null) where TChild1 : class where TChild2 : class where TChild3 : class;
+        Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2, TChild3>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, object>> tChild1, Expression<Func<TEntity, object>> tChild2, Expression<Func<TEntity, object>> tChild3, IDbTransaction transaction = null);
+
+        Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2, TChild3, TChild4>(Expression<Func<TEntity, object>> tChild1, Expression<Func<TEntity, object>> tChild2, Expression<Func<TEntity, object>> tChild3, Expression<Func<TEntity, object>> tChild4, IDbTransaction transaction = null);
+
+        Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2, TChild3, TChild4>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, object>> tChild1, Expression<Func<TEntity, object>> tChild2, Expression<Func<TEntity, object>> tChild3, Expression<Func<TEntity, object>> tChild4, IDbTransaction transaction = null);
+
+        Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2, TChild3, TChild4, TChild5>(Expression<Func<TEntity, object>> tChild1, Expression<Func<TEntity, object>> tChild2, Expression<Func<TEntity, object>> tChild3, Expression<Func<TEntity, object>> tChild4, Expression<Func<TEntity, object>> tChild5, IDbTransaction transaction = null);
+
+        Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2, TChild3, TChild4, TChild5>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, object>> tChild1, Expression<Func<TEntity, object>> tChild2, Expression<Func<TEntity, object>> tChild3, Expression<Func<TEntity, object>> tChild4, Expression<Func<TEntity, object>> tChild5, IDbTransaction transaction = null);
+
+        Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2, TChild3, TChild4, TChild5, TChild6>(Expression<Func<TEntity, object>> tChild1, Expression<Func<TEntity, object>> tChild2, Expression<Func<TEntity, object>> tChild3, Expression<Func<TEntity, object>> tChild4, Expression<Func<TEntity, object>> tChild5, Expression<Func<TEntity, object>> tChild6, IDbTransaction transaction = null);
+
+        Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2, TChild3, TChild4, TChild5, TChild6>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, object>> tChild1, Expression<Func<TEntity, object>> tChild2, Expression<Func<TEntity, object>> tChild3, Expression<Func<TEntity, object>> tChild4, Expression<Func<TEntity, object>> tChild5, Expression<Func<TEntity, object>> tChild6, IDbTransaction transaction = null);
 
         /// <summary>
         ///

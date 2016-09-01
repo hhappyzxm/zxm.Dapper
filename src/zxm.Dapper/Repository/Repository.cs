@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Dapper;
-using zxm.Dapper.Extensions;
 using zxm.Dapper.SqlGenerator;
+using System.Reflection;
+using zxm.Dapper.Helper;
+using zxm.Dapper.Extensions;
 
 namespace zxm.Dapper.Repository
 {
@@ -68,34 +72,6 @@ namespace zxm.Dapper.Repository
         {
             var queryResult = SqlGenerator.GetSelectFirst(predicate);
             return Connection.QueryFirstOrDefault<TEntity>(queryResult.Sql, queryResult.Param);
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-
-        public virtual TEntity Find<TChild1>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, object>> tChild1, IDbTransaction transaction = null)
-        {
-            var queryResult = SqlGenerator.GetSelectFirst(predicate);
-            return FindAll<TChild1>(queryResult, tChild1).FirstOrDefault();
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public virtual async Task<TEntity> FindAsync<TChild1>(Expression<Func<TEntity, object>> tChild1, IDbTransaction transaction = null)
-        {
-            var queryResult = SqlGenerator.GetSelectFirst(null, tChild1);
-            return (await FindAllAsync<TChild1>(queryResult, tChild1, transaction)).FirstOrDefault();
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public virtual async Task<TEntity> FindAsync<TChild1>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, object>> tChild1, IDbTransaction transaction = null)
-        {
-            var queryResult = SqlGenerator.GetSelectFirst(predicate, tChild1);
-            return (await FindAllAsync<TChild1>(queryResult, tChild1, transaction)).FirstOrDefault();
         }
 
         /// <summary>
@@ -171,7 +147,7 @@ namespace zxm.Dapper.Repository
             var type = typeof(TEntity);
             IEnumerable<TEntity> result;
             var propertyName = ExpressionHelper.GetPropertyName(tChild1);
-            var tj1Property = type.GetProperty(propertyName);
+            var tj1Property = TypeHelper.GetProperty(type, propertyName);
             if (tj1Property.PropertyType.IsGenericType())
             {
                 var lookup = new Dictionary<object, TEntity>();
@@ -207,7 +183,7 @@ namespace zxm.Dapper.Repository
             {
                 result = Connection.Query<TEntity, TChild1, TEntity>(sqlQuery.Sql, (entity, j1) =>
                 {
-                    type.GetProperty(propertyName).SetValue(entity, j1);
+                    TypeHelper.GetProperty(type, propertyName).SetValue(entity, j1);
                     return entity;
                 }, sqlQuery.Param, transaction);
             }
@@ -244,363 +220,261 @@ namespace zxm.Dapper.Repository
         /// <summary>
         ///
         /// </summary>
-        public virtual async Task<IEnumerable<TEntity>> FindAllAsync<TChild1>(Expression<Func<TEntity, object>> tChild1, IDbTransaction transaction = null)
+        public virtual Task<IEnumerable<TEntity>> FindAllAsync<TChild1>(Expression<Func<TEntity, object>> tChild1, IDbTransaction transaction = null)
         {
-            var queryResult = SqlGenerator.GetSelectAll(null, tChild1);
-            return await FindAllAsync<TChild1>(queryResult, tChild1, transaction);
+           return FindAllAsync<TChild1>(null, tChild1, transaction);
         }
 
         /// <summary>
         ///
         /// </summary>
-        public virtual async Task<IEnumerable<TEntity>> FindAllAsync<TChild1>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, object>> tChild1, IDbTransaction transaction = null)
+        public virtual Task<IEnumerable<TEntity>> FindAllAsync<TChild1>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, object>> tChild1, IDbTransaction transaction = null)
         {
-            var queryResult = SqlGenerator.GetSelectAll(predicate, tChild1);
-            return await FindAllAsync<TChild1>(queryResult, tChild1, transaction);
+            var sqlQuery = new SqlGenerator<TEntity>().GetSelectAll(predicate, tChild1);
+            return FindAllAsync<TChild1, DontMap, DontMap, DontMap, DontMap, DontMap>(sqlQuery, transaction, tChild1);
         }
 
         public virtual Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2>(
             Expression<Func<TEntity, object>> tChild1,
             Expression<Func<TEntity, object>> tChild2,
             IDbTransaction transaction = null)
-            where TChild1 : class
-            where TChild2 : class
         {
             return FindAllAsync<TChild1, TChild2>(null, tChild1, tChild2, transaction);
         }
 
-
-        public virtual async Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, object>> tChild1, Expression<Func<TEntity, object>> tChild2, IDbTransaction transaction = null)
-            where TChild1 : class
-            where TChild2 : class
+        public virtual Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2>(
+            Expression<Func<TEntity, bool>> predicate,
+            Expression<Func<TEntity, object>> tChild1,
+            Expression<Func<TEntity, object>> tChild2,
+            IDbTransaction transaction = null)
         {
-            var sqlQuery = SqlGenerator.GetSelectAll(predicate, tChild1, tChild2);
-
-            var type = typeof(TEntity);
-            var propertyName1 = ExpressionHelper.GetPropertyName(tChild1);
-            var propertyName2 = ExpressionHelper.GetPropertyName(tChild2);
-
-            var tj1Property = type.GetProperty(propertyName1);
-            var tj2Property = type.GetProperty(propertyName2);
-
-            var lookup = new Dictionary<object, TEntity>();
-
-            var keyPropertyMeta = SqlGenerator.KeySqlProperties.FirstOrDefault();
-            if (keyPropertyMeta == null)
-                throw new Exception("key not found");
-
-            var sqlGenerator1 = new SqlGenerator.SqlGenerator<TChild1>();
-            var keyPropertyMeta1 = sqlGenerator1.KeySqlProperties.FirstOrDefault();
-            if (keyPropertyMeta1 == null)
-                throw new Exception("key not found");
-
-            var sqlGenerator2 = new SqlGenerator.SqlGenerator<TChild2>();
-            var keyPropertyMeta2 = sqlGenerator2.KeySqlProperties.FirstOrDefault();
-            if (keyPropertyMeta2 == null)
-                throw new Exception("key not found");
-
-            var keyProperty = keyPropertyMeta.PropertyInfo;
-            var keyProperty1 = keyPropertyMeta1.PropertyInfo;
-            var keyProperty2 = keyPropertyMeta2.PropertyInfo;
-
-            var spiltOn = "Id";
-            if (keyProperty1.Name != "Id" || keyProperty2.Name == "Id")
-            {
-                spiltOn = keyProperty1.Name + "," + keyProperty2.Name;
-            }
-
-            await Connection.QueryAsync<TEntity, TChild1, TChild2, TEntity>(sqlQuery.Sql, (entity, j1, j2) =>
-            {
-                var key = keyProperty.GetValue(entity);
-
-                TEntity en;
-                if (!lookup.TryGetValue(key, out en))
-                {
-                    lookup.Add(key, en = entity);
-                }
-
-                if (tj1Property.PropertyType.IsGenericType())
-                {
-                    var list = (List<TChild1>)tj1Property.GetValue(en) ?? new List<TChild1>();
-                    if (j1 != null)
-                    {
-                        var key1 = keyProperty1.GetValue(j1);
-                        bool exist = false;
-                        foreach (var item in list)
-                        {
-                            var tmpKey = keyProperty1.GetValue(item);
-                            if (tmpKey.Equals(key1))
-                            {
-                                exist = true;
-                                break;
-                            }
-                        }
-
-                        if (!exist)
-                        {
-                            list.Add(j1);
-                        }
-                    }
-
-                    tj1Property.SetValue(en, list);
-                }
-                else
-                {
-                    type.GetProperty(propertyName1).SetValue(en, j1);
-                }
-
-                if (tj2Property.PropertyType.IsGenericType())
-                {
-                    var list = (List<TChild2>)tj2Property.GetValue(en) ?? new List<TChild2>();
-                    if (j2 != null)
-                    {
-                        var key2 = keyProperty2.GetValue(j2);
-                        bool exist = false;
-                        foreach (var item in list)
-                        {
-                            var tmpKey = keyProperty2.GetValue(item);
-                            if (tmpKey.Equals(key2))
-                            {
-                                exist = true;
-                                break;
-                            }
-                        }
-
-                        if (!exist)
-                        {
-                            list.Add(j2);
-                        }
-                    }
-
-                    tj2Property.SetValue(en, list);
-                }
-                else
-                {
-                    type.GetProperty(propertyName2).SetValue(en, j2);
-                }
-
-                return en;
-            }, sqlQuery.Param, transaction, true, spiltOn);
-
-            return lookup.Values;
+            var sqlQuery = new SqlGenerator<TEntity>().GetSelectAll(predicate, tChild1, tChild2);
+            return FindAllAsync<TChild1, TChild2, DontMap, DontMap, DontMap, DontMap>(sqlQuery, transaction, tChild1, tChild2);
         }
 
         public Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2, TChild3>(
-            Expression<Func<TEntity, object>> tChild1,
-            Expression<Func<TEntity, object>> tChild2,
-            Expression<Func<TEntity, object>> tChild3,
-            IDbTransaction transaction = null)
-            where TChild1 : class
-            where TChild2 : class
-            where TChild3 : class
+           Expression<Func<TEntity, object>> tChild1,
+           Expression<Func<TEntity, object>> tChild2,
+           Expression<Func<TEntity, object>> tChild3,
+           IDbTransaction transaction = null)
         {
             return FindAllAsync<TChild1, TChild2, TChild3>(null, tChild1, tChild2, tChild3, transaction);
         }
 
-        public async Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2, TChild3>(
+        public Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2, TChild3>(
             Expression<Func<TEntity, bool>> predicate,
             Expression<Func<TEntity, object>> tChild1,
             Expression<Func<TEntity, object>> tChild2,
             Expression<Func<TEntity, object>> tChild3,
             IDbTransaction transaction = null)
-            where TChild1 : class
-            where TChild2 : class
-            where TChild3 : class
         {
-            var sqlQuery = SqlGenerator.GetSelectAll(predicate, tChild1, tChild2, tChild3);
+            var sqlQuery = new SqlGenerator<TEntity>().GetSelectAll(predicate, tChild1, tChild2, tChild3);
+            return FindAllAsync<TChild1, TChild2, TChild3, DontMap, DontMap, DontMap>(sqlQuery, transaction, tChild1, tChild2, tChild3);
+        }
 
+        public Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2, TChild3, TChild4>(
+           Expression<Func<TEntity, object>> tChild1,
+           Expression<Func<TEntity, object>> tChild2,
+           Expression<Func<TEntity, object>> tChild3,
+           Expression<Func<TEntity, object>> tChild4,
+           IDbTransaction transaction = null)
+        {
+            return FindAllAsync<TChild1, TChild2, TChild3, TChild4>(null, tChild1, tChild2, tChild3, tChild4, transaction);
+        }
+
+        public Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2, TChild3, TChild4>(
+            Expression<Func<TEntity, bool>> predicate,
+            Expression<Func<TEntity, object>> tChild1,
+            Expression<Func<TEntity, object>> tChild2,
+            Expression<Func<TEntity, object>> tChild3,
+            Expression<Func<TEntity, object>> tChild4,
+            IDbTransaction transaction = null)
+        {
+            var sqlQuery = new SqlGenerator<TEntity>().GetSelectAll(predicate, tChild1, tChild2, tChild3, tChild4);
+            return FindAllAsync<TChild1, TChild2, TChild3, TChild4, DontMap, DontMap>(sqlQuery, transaction, tChild1, tChild2, tChild3, tChild4);
+        }
+
+        public Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2, TChild3, TChild4, TChild5>(
+           Expression<Func<TEntity, object>> tChild1,
+           Expression<Func<TEntity, object>> tChild2,
+           Expression<Func<TEntity, object>> tChild3,
+           Expression<Func<TEntity, object>> tChild4,
+           Expression<Func<TEntity, object>> tChild5,
+           IDbTransaction transaction = null)
+        {
+            return FindAllAsync<TChild1, TChild2, TChild3, TChild4, TChild5>(null, tChild1, tChild2, tChild3, tChild4, tChild5, transaction);
+        }
+
+        public Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2, TChild3, TChild4, TChild5>(
+            Expression<Func<TEntity, bool>> predicate,
+            Expression<Func<TEntity, object>> tChild1,
+            Expression<Func<TEntity, object>> tChild2,
+            Expression<Func<TEntity, object>> tChild3,
+            Expression<Func<TEntity, object>> tChild4,
+            Expression<Func<TEntity, object>> tChild5,
+            IDbTransaction transaction = null)
+        {
+            var sqlQuery = new SqlGenerator<TEntity>().GetSelectAll(predicate, tChild1, tChild2, tChild3, tChild4, tChild5);
+            return FindAllAsync<TChild1, TChild2, TChild3, TChild4, TChild5, DontMap>(sqlQuery, transaction, tChild1, tChild2, tChild3, tChild4, tChild5);
+        }
+
+        public Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2, TChild3, TChild4, TChild5, TChild6>(
+           Expression<Func<TEntity, object>> tChild1,
+           Expression<Func<TEntity, object>> tChild2,
+           Expression<Func<TEntity, object>> tChild3,
+           Expression<Func<TEntity, object>> tChild4,
+           Expression<Func<TEntity, object>> tChild5,
+           Expression<Func<TEntity, object>> tChild6,
+           IDbTransaction transaction = null)
+        {
+            return FindAllAsync<TChild1, TChild2, TChild3, TChild4, TChild5, TChild6>(null, tChild1, tChild2, tChild3, tChild4, tChild5, tChild6, transaction);
+        }
+
+        public Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2, TChild3, TChild4, TChild5, TChild6>(
+            Expression<Func<TEntity, bool>> predicate,
+            Expression<Func<TEntity, object>> tChild1,
+            Expression<Func<TEntity, object>> tChild2,
+            Expression<Func<TEntity, object>> tChild3,
+            Expression<Func<TEntity, object>> tChild4,
+            Expression<Func<TEntity, object>> tChild5,
+            Expression<Func<TEntity, object>> tChild6,
+            IDbTransaction transaction = null)
+        {
+            var sqlQuery = new SqlGenerator<TEntity>().GetSelectAll(predicate, tChild1, tChild2, tChild3, tChild4, tChild5, tChild6);
+            return FindAllAsync<TChild1, TChild2, TChild3, TChild4, TChild5, TChild6>(sqlQuery, transaction, tChild1, tChild2, tChild3, tChild4, tChild5, tChild6);
+        }
+
+        private async Task<IEnumerable<TEntity>> FindAllAsync<TChild1, TChild2, TChild3, TChild4, TChild5, TChild6>(
+              SqlQuery sqlQuery,
+              IDbTransaction transaction,
+              params Expression<Func<TEntity, object>>[] includes)
+        {
             var type = typeof(TEntity);
-            var propertyName1 = ExpressionHelper.GetPropertyName(tChild1);
-            var propertyName2 = ExpressionHelper.GetPropertyName(tChild2);
-            var propertyName3 = ExpressionHelper.GetPropertyName(tChild3);
 
-            var tj1Property = type.GetProperty(propertyName1);
-            var tj2Property = type.GetProperty(propertyName2);
-            var tj3Property = type.GetProperty(propertyName3);
-
-            var lookup = new Dictionary<object, TEntity>();
+            var childPropertyNames = includes.Select(ExpressionHelper.GetPropertyName).ToList();
+            var childProperties = childPropertyNames.Select(p => TypeHelper.GetProperty(type, p)).ToList();
 
             var keyPropertyMeta = SqlGenerator.KeySqlProperties.FirstOrDefault();
             if (keyPropertyMeta == null)
                 throw new Exception("key not found");
 
-            var sqlGenerator1 = new SqlGenerator.SqlGenerator<TChild1>();
-            var keyPropertyMeta1 = sqlGenerator1.KeySqlProperties.FirstOrDefault();
-            if (keyPropertyMeta1 == null)
-                throw new Exception("key not found");
-
-            var sqlGenerator2 = new SqlGenerator.SqlGenerator<TChild2>();
-            var keyPropertyMeta2 = sqlGenerator2.KeySqlProperties.FirstOrDefault();
-            if (keyPropertyMeta2 == null)
-                throw new Exception("key not found");
-
-            var sqlGenerator3 = new SqlGenerator.SqlGenerator<TChild3>();
-            var keyPropertyMeta3 = sqlGenerator3.KeySqlProperties.FirstOrDefault();
-            if (keyPropertyMeta3 == null)
-                throw new Exception("key not found");
-
             var keyProperty = keyPropertyMeta.PropertyInfo;
-            var keyProperty1 = keyPropertyMeta1.PropertyInfo;
-            var keyProperty2 = keyPropertyMeta2.PropertyInfo;
-            var keyProperty3 = keyPropertyMeta3.PropertyInfo;
-
-            await Connection.QueryAsync<TEntity, TChild1, TChild2, TChild3, TEntity>(sqlQuery.Sql, (entity, j1, j2, j3) =>
+            var childKeyProperties = new List<PropertyInfo>();
+            foreach (var property in childProperties)
             {
-                var key = keyProperty.GetValue(entity);
+                var childType = property.PropertyType.IsGenericType() ? property.PropertyType.GenericTypeArguments[0] : property.PropertyType;
+                var properties = childType.GetProperties().Where(ExpressionHelper.GetPrimitivePropertiesPredicate());
+                childKeyProperties.Add(properties.First(p => p.GetCustomAttributes<KeyAttribute>().Any()));
+            }
 
-                TEntity en;
-                if (!lookup.TryGetValue(key, out en))
-                {
-                    lookup.Add(key, en = entity);
-                }
+            var lookup = new Dictionary<object, TEntity>();
+            bool buffered = true;
 
-                if (tj1Property.PropertyType.IsGenericType())
-                {
-                    var list = (List<TChild1>)tj1Property.GetValue(en) ?? new List<TChild1>();
-                    if (j1 != null)
-                    {
-                        var key1 = keyProperty1.GetValue(j1);
-                        bool exist = false;
-                        foreach (var item in list)
-                        {
-                            var tmpKey = keyProperty1.GetValue(item);
-                            if (tmpKey.Equals(key1))
-                            {
-                                exist = true;
-                                break;
-                            }
-                        }
+            var spiltOn = "Id";
+            var childKeyNames = childKeyProperties.Select(p => p.Name).ToList();
+            if (childKeyNames.Any(p => p != "Id"))
+            {
+                spiltOn = string.Join(",", childKeyNames);
+            }
 
-                        if (!exist)
-                        {
-                            list.Add(j1);
-                        }
-                    }
-
-                    tj1Property.SetValue(en, list);
-                }
-                else
-                {
-                    type.GetProperty(propertyName1).SetValue(en, j1);
-                }
-
-                if (tj2Property.PropertyType.IsGenericType())
-                {
-                    var list = (List<TChild2>)tj2Property.GetValue(en) ?? new List<TChild2>();
-                    if (j2 != null)
-                    {
-                        var key2 = keyProperty2.GetValue(j2);
-                        bool exist = false;
-                        foreach (var item in list)
-                        {
-                            var tmpKey = keyProperty2.GetValue(item);
-                            if (tmpKey.Equals(key2))
-                            {
-                                exist = true;
-                                break;
-                            }
-                        }
-
-                        if (!exist)
-                        {
-                            list.Add(j2);
-                        }
-                    }
-
-                    tj2Property.SetValue(en, list);
-                }
-                else
-                {
-                    type.GetProperty(propertyName2).SetValue(en, j2);
-                }
-
-                if (tj3Property.PropertyType.IsGenericType())
-                {
-                    var list = (List<TChild3>)tj3Property.GetValue(en) ?? new List<TChild3>();
-                    if (j3 != null)
-                    {
-                        var key3 = keyProperty3.GetValue(j3);
-                        bool exist = false;
-                        foreach (var item in list)
-                        {
-                            var tmpKey = keyProperty3.GetValue(item);
-                            if (tmpKey.Equals(key3))
-                            {
-                                exist = true;
-                                break;
-                            }
-                        }
-
-                        if (!exist)
-                        {
-                            list.Add(j3);
-                        }
-                    }
-
-                    tj3Property.SetValue(en, list);
-                }
-                else
-                {
-                    type.GetProperty(propertyName3).SetValue(en, j3);
-                }
-
-                return en;
-            }, sqlQuery.Param, transaction);
+            if (includes.Length == 1)
+            {
+                await Connection.QueryAsync<TEntity, TChild1, TEntity>(sqlQuery.Sql, (entity, child1) => EntityMapping<TChild1, TChild2, TChild3, TChild4, TChild5, TChild6>(lookup, keyProperty, childKeyProperties, childProperties, childPropertyNames, type, entity, child1), sqlQuery.Param, transaction, buffered, spiltOn);
+            }
+            else if (includes.Length == 2)
+            {
+                await Connection.QueryAsync<TEntity, TChild1, TChild2, TEntity>(sqlQuery.Sql, (entity, child1, child2) => EntityMapping<TChild1, TChild2, TChild3, TChild4, TChild5, TChild6>(lookup, keyProperty, childKeyProperties, childProperties, childPropertyNames, type, entity, child1, child2), sqlQuery.Param, transaction, buffered, spiltOn);
+            }
+            else if (includes.Length == 3)
+            {
+                await Connection.QueryAsync<TEntity, TChild1, TChild2, TChild3, TEntity>(sqlQuery.Sql, (entity, child1, child2, child3) => EntityMapping<TChild1, TChild2, TChild3, TChild4, TChild5, TChild6>(lookup, keyProperty, childKeyProperties, childProperties, childPropertyNames, type, entity, child1, child2, child3), sqlQuery.Param, transaction, buffered, spiltOn);
+            }
+            else if (includes.Length == 4)
+            {
+                await Connection.QueryAsync<TEntity, TChild1, TChild2, TChild3, TChild4, TEntity>(sqlQuery.Sql, (entity, child1, child2, child3, child4) => EntityMapping<TChild1, TChild2, TChild3, TChild4, TChild5, TChild6>(lookup, keyProperty, childKeyProperties, childProperties, childPropertyNames, type, entity, child1, child2, child3, child4), sqlQuery.Param, transaction, buffered, spiltOn);
+            }
+            else if (includes.Length == 5)
+            {
+                await Connection.QueryAsync<TEntity, TChild1, TChild2, TChild3, TChild4, TChild5, TEntity>(sqlQuery.Sql, (entity, child1, child2, child3, child4, child5) => EntityMapping<TChild1, TChild2, TChild3, TChild4, TChild5, TChild6>(lookup, keyProperty, childKeyProperties, childProperties, childPropertyNames, type, entity, child1, child2, child3, child4, child5), sqlQuery.Param, transaction, buffered, spiltOn);
+            }
+            else if (includes.Length == 6)
+            {
+                await Connection.QueryAsync<TEntity, TChild1, TChild2, TChild3, TChild4, TChild5, TChild6, TEntity>(sqlQuery.Sql, (entity, child1, child2, child3, child4, child5, child6) => EntityMapping<TChild1, TChild2, TChild3, TChild4, TChild5, TChild6>(lookup, keyProperty, childKeyProperties, childProperties, childPropertyNames, type, entity, child1, child2, child3, child4, child5, child6), sqlQuery.Param, transaction, buffered, spiltOn);
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
 
             return lookup.Values;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        private async Task<IEnumerable<TEntity>> FindAllAsync<TChild1>(SqlQuery sqlQuery, Expression<Func<TEntity, object>> tChild1, IDbTransaction transaction = null)
+        private TEntity EntityMapping<TChild1, TChild2, TChild3, TChild4, TChild5, TChild6>(Dictionary<object, TEntity> lookup, PropertyInfo keyProperty, IList<PropertyInfo> childKeyProperties, IList<PropertyInfo> childProperties, IList<string> propertyNames, Type entityType, TEntity entity, params object[] childs)
         {
-            var type = typeof(TEntity);
-            var propertyName = ExpressionHelper.GetPropertyName(tChild1);
+            var key = keyProperty.GetValue(entity);
 
-            IEnumerable<TEntity> result = null;
-            var tj1Property = type.GetProperty(propertyName);
-            if (tj1Property.PropertyType.IsGenericType())
+            TEntity target;
+            if (!lookup.TryGetValue(key, out target))
             {
-                var lookup = new Dictionary<object, TEntity>();
+                lookup.Add(key, target = entity);
+            }
 
-                var keyPropertyMeta = SqlGenerator.KeySqlProperties.FirstOrDefault();
-                if (keyPropertyMeta == null)
-                    throw new Exception("key not found");
+            for (var i = 0; i < childs.Length; i++)
+            {
+                var child = childs[i];
+                var childProperty = childProperties[i];
+                var propertyName = propertyNames[i];
+                var childKeyProperty = childKeyProperties[i];
 
-                var keyProperty = keyPropertyMeta.PropertyInfo;
-
-                await Connection.QueryAsync<TEntity, TChild1, TEntity>(sqlQuery.Sql, (entity, j1) =>
+                if (childProperty.PropertyType.IsGenericType())
                 {
-                    var key = keyProperty.GetValue(entity);
-
-                    TEntity en;
-                    if (!lookup.TryGetValue(key, out en))
+                    var list = (IList)childProperty.GetValue(target);
+                    if (list == null)
                     {
-                        lookup.Add(key, en = entity);
+                        switch (i)
+                        {
+                            case 0:
+                                list = new List<TChild1>();
+                                break;
+                            case 1:
+                                list = new List<TChild2>();
+                                break;
+                            case 2:
+                                list = new List<TChild3>();
+                                break;
+                            case 3:
+                                list = new List<TChild4>();
+                                break;
+                            case 4:
+                                list = new List<TChild5>();
+                                break;
+                            case 5:
+                                list = new List<TChild6>();
+                                break;
+                            default:
+                                throw  new NotSupportedException();
+                        }
+
+                        childProperty.SetValue(target, list);
                     }
 
-                    var list = (List<TChild1>)tj1Property.GetValue(en) ?? new List<TChild1>();
-                    if (j1 != null)
-                        list.Add(j1);
-
-                    tj1Property.SetValue(en, list);
-
-                    return en;
-                }, sqlQuery.Param, transaction);
-
-                result = lookup.Values;
-            }
-            else
-            {
-                result = await Connection.QueryAsync<TEntity, TChild1, TEntity>(sqlQuery.Sql, (entity, j1) =>
+                    if (child != null)
+                    {
+                        var childKey = childKeyProperty.GetValue(child);
+                        var exist = (from object item in list select childKeyProperty.GetValue(item)).Contains(childKey);
+                        if (!exist)
+                        {
+                            list.Add(child);
+                        }
+                    }
+                }
+                else
                 {
-                    type.GetProperty(propertyName).SetValue(entity, j1);
-                    return entity;
-                }, sqlQuery.Param, transaction);
+                    TypeHelper.GetProperty(entityType, propertyName).SetValue(target, child);
+                }
             }
 
-            return result;
+            return target;
         }
 
         #endregion FindAll
@@ -790,5 +664,10 @@ namespace zxm.Dapper.Repository
         }
 
         #endregion Beetwen
+
+        /// <summary>
+        /// Dummy type for excluding from multi-map
+        /// </summary>
+        class DontMap { }
     }
 }

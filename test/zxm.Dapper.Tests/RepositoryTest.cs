@@ -29,11 +29,11 @@ namespace zxm.Dapper.Tests
             Assert.Equal(users[0].Cars[0].CarName, "Car1");
             Assert.Equal(users[1].Cars.Count, 0);
 
-            //var dishes = (await _sqlDatabaseFixture.Db.SetEntity<Dish>().FindAllAsync<DishImage>(null, p => p.DishImages)).ToList();
-            //Assert.Equal(dishes.Count, 3);
-            //Assert.Equal(dishes[0].DishImages.Count, 1);
-            //Assert.Equal(dishes[1].DishImages.Count, 1);
-            //Assert.Equal(dishes[2].DishImages.Count, 2);
+            var dishes = (await _sqlDatabaseFixture.Db.SetEntity<Dish>().FindAllAsync<DishImage>(null, p => p.DishImages)).ToList();
+            Assert.Equal(dishes.Count, 3);
+            Assert.Equal(dishes[0].DishImages.Count, 1);
+            Assert.Equal(dishes[1].DishImages.Count, 1);
+            Assert.Equal(dishes[2].DishImages.Count, 2);
         }
 
         [Fact]
