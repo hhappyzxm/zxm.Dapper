@@ -80,7 +80,6 @@ namespace zxm.Dapper.SqlGenerator
 
         #endregion Logic delete
 
-
         /// <summary>
         /// Has Date of changed
         /// </summary>
@@ -350,7 +349,7 @@ namespace zxm.Dapper.SqlGenerator
 
                     var properties = joinType.GetProperties().Where(ExpressionHelper.GetPrimitivePropertiesPredicate());
                     var props = properties.Where(p => !p.GetCustomAttributes<NotMappedAttribute>().Any()).Select(p => new SqlPropertyMetadata(p));
-                    originalBuilder.Append(", " + GetFieldsSelect(attrJoin.TableName, props));
+                    originalBuilder.Append(", " + GetFieldsSelect(attrJoin.TableName, props, true));
 
 
                     joinsBuilder.Append($"{joinString} {attrJoin.TableName} ON {TableName}.{attrJoin.Key} = {attrJoin.TableName}.{attrJoin.ExternalKey} ");
@@ -359,8 +358,13 @@ namespace zxm.Dapper.SqlGenerator
             return joinsBuilder;
         }
 
-        private static string GetFieldsSelect(string tableName, IEnumerable<SqlPropertyMetadata> properties)
+        private string GetFieldsSelect(string tableName, IEnumerable<SqlPropertyMetadata> properties, bool needSort = false)
         {
+            if (needSort)
+            {
+                properties = properties.OrderByDescending(p => p.PropertyInfo.GetCustomAttributes<KeyAttribute>().Any());
+            }
+
             //Projection function
             Func<SqlPropertyMetadata, string> projectionFunction = (p) => !string.IsNullOrEmpty(p.Alias) ? $"{tableName}.{p.ColumnName} AS {p.Name}" : $"{tableName}.{p.ColumnName}";
             
@@ -423,7 +427,7 @@ namespace zxm.Dapper.SqlGenerator
                 }
             }
 
-            if (firstOnly && (SqlConnector == zxm.Dapper.SqlGenerator.ESqlConnector.MySQL || SqlConnector == zxm.Dapper.SqlGenerator.ESqlConnector.PostgreSQL))
+            if (firstOnly && (SqlConnector == ESqlConnector.MySQL || SqlConnector == ESqlConnector.PostgreSQL))
                 builder.Append("LIMIT 1");
 
 

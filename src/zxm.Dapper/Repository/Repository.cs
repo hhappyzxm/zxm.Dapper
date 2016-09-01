@@ -303,6 +303,12 @@ namespace zxm.Dapper.Repository
             var keyProperty1 = keyPropertyMeta1.PropertyInfo;
             var keyProperty2 = keyPropertyMeta2.PropertyInfo;
 
+            var spiltOn = "Id";
+            if (keyProperty1.Name != "Id" || keyProperty2.Name == "Id")
+            {
+                spiltOn = keyProperty1.Name + "," + keyProperty2.Name;
+            }
+
             await Connection.QueryAsync<TEntity, TChild1, TChild2, TEntity>(sqlQuery.Sql, (entity, j1, j2) =>
             {
                 var key = keyProperty.GetValue(entity);
@@ -374,7 +380,7 @@ namespace zxm.Dapper.Repository
                 }
 
                 return en;
-            }, sqlQuery.Param, transaction);
+            }, sqlQuery.Param, transaction, true, spiltOn);
 
             return lookup.Values;
         }
