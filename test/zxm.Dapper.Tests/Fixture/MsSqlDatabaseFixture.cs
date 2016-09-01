@@ -36,7 +36,7 @@ namespace zxm.Dapper.Tests.Fixture
             Db.Connection.Execute(@"CREATE TABLE Images (Id int IDENTITY(1,1) not null, Name varchar(50) not null, UserId int, PRIMARY KEY (Id))");
             Db.Connection.Execute(@"CREATE TABLE Dishes (DishId int IDENTITY(1,1) not null, Name varchar(50) not null, PRIMARY KEY (DishId))");
             Db.Connection.Execute(@"CREATE TABLE DishImages (DishImageId int IDENTITY(1,1) not null, DishId int not null, Image varchar(50) not null, PRIMARY KEY (DishImageId))");
-            Db.Connection.Execute(@"CREATE TABLE DishOptions (DishOptionId int IDENTITY(1,1) not null, DishId int not null, OptionName varchar(50) not null, PRIMARY KEY (DishOptionId))");
+            Db.Connection.Execute(@"CREATE TABLE DishOptions (DishOptionId int IDENTITY(1,1) not null, DishId int not null, [Option] varchar(50) not null, PRIMARY KEY (DishOptionId))");
 
             Db.Connection.Execute($"INSERT INTO [dbo].[Users]([Name],[Deleted])VALUES('Name1', 0)");
             Db.Connection.Execute($"INSERT INTO [dbo].[Users]([Name],[Deleted])VALUES('Name2', 0)");
@@ -58,9 +58,9 @@ namespace zxm.Dapper.Tests.Fixture
             Db.Connection.Execute($"INSERT INTO [dbo].[DishImages]([Image],[DishId])VALUES('DishImage2', 2)");
             Db.Connection.Execute($"INSERT INTO [dbo].[DishImages]([Image],[DishId])VALUES('DishImage1', 3)");
             Db.Connection.Execute($"INSERT INTO [dbo].[DishImages]([Image],[DishId])VALUES('DishImage2', 3)");
-            Db.Connection.Execute($"INSERT INTO [dbo].[DishOptions]([OptionName],[DishId])VALUES('DishOption1', 1)");
-            Db.Connection.Execute($"INSERT INTO [dbo].[DishOptions]([OptionName],[DishId])VALUES('DishOption2', 1)");
-            Db.Connection.Execute($"INSERT INTO [dbo].[DishOptions]([OptionName],[DishId])VALUES('DishOption1', 3)");
+            Db.Connection.Execute($"INSERT INTO [dbo].[DishOptions]([Option],[DishId])VALUES('DishOption1', 1)");
+            Db.Connection.Execute($"INSERT INTO [dbo].[DishOptions]([Option],[DishId])VALUES('DishOption2', 1)");
+            Db.Connection.Execute($"INSERT INTO [dbo].[DishOptions]([Option],[DishId])VALUES('DishOption1', 3)");
         }
 
         public void Dispose()

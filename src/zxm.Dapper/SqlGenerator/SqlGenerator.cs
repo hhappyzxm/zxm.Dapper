@@ -349,10 +349,17 @@ namespace zxm.Dapper.SqlGenerator
                     var joinType = joinProperty.PropertyType.IsGenericType() ? joinProperty.PropertyType.GenericTypeArguments[0] : joinProperty.PropertyType;
 
                     var properties = joinType.GetProperties().Where(ExpressionHelper.GetPrimitivePropertiesPredicate());
-                    var props = properties.Where(p => !p.GetCustomAttributes<NotMappedAttribute>().Any()).Select(p => new SqlPropertyMetadata(p));
+                    var props = properties.Where(p => !p.GetCustomAttributes<NotMappedAttribute>().Any()).Select(p => new SqlPropertyMetadata(p)).ToList();
+
+                    if (SqlConnector == ESqlConnector.MSSQL)
+                    {
+                        props.ForEach(p => p.ColumnName = $"[{p.ColumnName}]");
+                        attrJoin.TableName = $"[{attrJoin.TableName}]";
+                        attrJoin.Key = $"[{attrJoin.Key}]";
+                        attrJoin.ExternalKey = $"[{attrJoin.ExternalKey}]";
+                    }
+
                     originalBuilder.Append(", " + GetFieldsSelect(attrJoin.TableName, props, true));
-
-
                     joinsBuilder.Append($"{joinString} {attrJoin.TableName} ON {TableName}.{attrJoin.Key} = {attrJoin.TableName}.{attrJoin.ExternalKey} ");
                 }
             }

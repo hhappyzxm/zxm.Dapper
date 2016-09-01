@@ -16,6 +16,6 @@ namespace zxm.Dapper.Tests.Entities
 
         public int DishId { get; set; }
 
-        public string OptionName { get; set; }
+        public string Option { get; set; }
     }
 }

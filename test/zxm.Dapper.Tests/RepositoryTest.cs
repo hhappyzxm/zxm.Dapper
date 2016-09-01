@@ -51,7 +51,7 @@ namespace zxm.Dapper.Tests
             Assert.Equal(dishes.Count, 3);
             Assert.Equal(dishes[0].DishImages.Count, 1);
             Assert.Equal(dishes[0].DishOptions.Count, 2);
-            Assert.Equal(dishes[0].DishOptions[0].OptionName, "DishOption1");
+            Assert.Equal(dishes[0].DishOptions[0].Option, "DishOption1");
             Assert.Equal(dishes[1].DishImages.Count, 1);
             Assert.Equal(dishes[1].DishOptions.Count, 0);
             Assert.Equal(dishes[2].DishImages.Count, 2);
