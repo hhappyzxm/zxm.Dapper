@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using zxm.Dapper.Repository;
 
 namespace zxm.Dapper.Context
@@ -6,7 +7,7 @@ namespace zxm.Dapper.Context
     /// <summary>
     /// DbContext interface
     /// </summary>
-    public interface IDbContext
+    public interface IDbContext : IDisposable
     {
         IDbConnection Connection { get; }
 
